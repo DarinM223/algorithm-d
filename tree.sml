@@ -6,9 +6,7 @@ end
 functor TreeFn(P: P) =
 struct datatype t' = Node of string * t list | Wildcard withtype t = t' P.t end
 
-structure Identity = struct type 'a t = 'a end
-
-structure Tree = TreeFn(Identity)
+structure Tree = TreeFn (struct type 'a t = 'a end)
 
 structure Labelled =
 struct
