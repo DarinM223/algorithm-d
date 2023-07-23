@@ -1,4 +1,4 @@
-structure Trie =
+structure Node =
 struct
   datatype 'a t =
     TrieNode of
