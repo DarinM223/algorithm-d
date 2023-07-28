@@ -1,4 +1,7 @@
 datatype symbol = Label of string | Child of int
+val showSymbol =
+  fn Label t0 => "Label " ^ "(" ^ "\"" ^ t0 ^ "\"" ^ ")"
+   | Child t1 => "Child " ^ "(" ^ Int.toString t1 ^ ")"
 
 structure Tree =
 struct
