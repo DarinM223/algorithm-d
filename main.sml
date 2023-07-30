@@ -4,8 +4,9 @@ val showPattern_paths = fn t0 =>
   ^
   String.concatWith ", "
     (List.map
-       (fn t0 => "[" ^ String.concatWith ", " (List.map showSymbol t0) ^ "]") t0)
-  ^ "]"
+       (fn t0 =>
+          "[" ^ String.concatWith ", " (List.map (Generic.show symbol) t0) ^ "]")
+       t0) ^ "]"
 
 val tree = Tree.Node
   ("a", [Tree.Node ("b", []), Tree.Wildcard, Tree.Node ("c", [Tree.Wildcard])])

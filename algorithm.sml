@@ -10,17 +10,9 @@ val symbol =
       , fn INR ? => Child ? | INL ? => Label ?
       )
   end
-val showSymbol =
-  fn Label t0 => "Label " ^ "(" ^ "\"" ^ t0 ^ "\"" ^ ")"
-   | Child t1 => "Child " ^ "(" ^ Int.toString t1 ^ ")"
 
 structure Trie =
-  Node
-    (struct
-       type t = symbol
-       val hash = Generic.hash symbol
-       val equal = fn (a, b) => a = b
-     end)
+  Node (struct type t = symbol val hash = Generic.hash symbol end)
 
 structure Tree =
 struct
@@ -71,7 +63,7 @@ struct
      | _ => raise Fail "Must have an ith child!"
 end
 
-val parse: string -> Tree.t = raise Fail ""
+val parse: string -> Tree.t = fn _ => raise Fail ""
 
 fun run pattern subject =
   let
@@ -80,7 +72,7 @@ fun run pattern subject =
     val paths = Tree.toPaths pattern
     val trie = Trie.create ()
     val () = List.app (Trie.add trie) paths
-    (* val () = Trie.compute trie *)
+    val () = Trie.compute trie
   in
     ()
   end
