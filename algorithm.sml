@@ -1,7 +1,26 @@
+infix +`
+
 datatype symbol = Label of string | Child of int
+val symbol =
+  let
+    open Generic
+  in
+    data' (C1' "Label" string +` C1' "Child" int)
+      ( fn Child ? => INR ? | Label ? => INL ?
+      , fn INR ? => Child ? | INL ? => Label ?
+      )
+  end
 val showSymbol =
   fn Label t0 => "Label " ^ "(" ^ "\"" ^ t0 ^ "\"" ^ ")"
    | Child t1 => "Child " ^ "(" ^ Int.toString t1 ^ ")"
+
+structure Trie =
+  Node
+    (struct
+       type t = symbol
+       val hash = Generic.hash symbol
+       val equal = fn (a, b) => a = b
+     end)
 
 structure Tree =
 struct
@@ -40,3 +59,28 @@ struct
       !paths
     end
 end
+
+structure LabelledTree =
+struct
+  open LabelledTree
+
+  val arity: t -> int =
+    fn {value = Node (_, xs), ...} => List.length xs | _ => 0
+  val child: int -> t -> t = fn i =>
+    fn {value = Node (_, xs), ...} => List.nth (xs, i)
+     | _ => raise Fail "Must have an ith child!"
+end
+
+val parse: string -> Tree.t = raise Fail ""
+
+fun run pattern subject =
+  let
+    val pattern = parse pattern
+    val subject = Tree.instantiate (parse subject)
+    val paths = Tree.toPaths pattern
+    val trie = Trie.create ()
+    val () = List.app (Trie.add trie) paths
+    (* val () = Trie.compute trie *)
+  in
+    ()
+  end

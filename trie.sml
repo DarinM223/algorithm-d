@@ -1,4 +1,11 @@
-structure Node =
+signature NodeType =
+sig
+  type t
+  val hash: t -> word
+  val equal: t * t -> bool
+end
+
+functor Node(NodeType: NodeType) =
 struct
   datatype 'a t =
     TrieNode of
@@ -8,6 +15,8 @@ struct
       , output: 'a t option ref
       , pattern: 'a list ref
       }
+  fun O m (TrieNode t) = m t
+
   local
     type 'a hashlist = ('a * 'a t) list
     val showHashlist = fn (show, a_) =>
@@ -42,12 +51,38 @@ struct
   in val show = t
   end
 
-  fun create t parent =
+  fun create' parent =
     TrieNode
       { parent = parent
-      , goto = HashTable.mkTable t (10, LibBase.NotFound)
+      , goto =
+          HashTable.mkTable (NodeType.hash, NodeType.equal)
+            (10, LibBase.NotFound)
       , suffix = ref NONE
       , output = ref NONE
       , pattern = ref []
       }
+
+  type 'a t = {root: 'a t}
+
+  val create = fn () => {root = create' NONE}
+
+  fun add (trie: NodeType.t t) xs =
+    let
+      val node = ref (#root trie)
+      fun go x =
+        let
+          val node' =
+            case HashTable.find (O #goto (!node)) x of
+              SOME node' => node'
+            | NONE =>
+                let val node' = create' (SOME (!node))
+                in HashTable.insert (O #goto (!node)) (x, node'); node'
+                end
+        in
+          node := node'
+        end
+    in
+      List.app go xs;
+      O #pattern (!node) := xs
+    end
 end
