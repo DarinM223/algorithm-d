@@ -138,14 +138,11 @@ struct
           val p: 'a t = Option.valOf (O #parent node)
           val p's_failure: 'a t = Option.valOf (!(O #failure p))
           fun follow f =
-            if Option.isNone (O #parent f) then (* Is root *)
-              (case HashTable.find (O #goto f) x of
-                 SOME actual => actual
-               | NONE => root)
-            else if not (HashTable.inDomain (O #goto f) x) then
-              follow (Option.valOf (!(O #failure f)))
-            else
-              HashTable.lookup (O #goto f) x
+            case HashTable.find (O #goto f) x of
+              SOME actual => actual
+            | NONE =>
+                if Option.isNone (O #parent f) then root
+                else follow (Option.valOf (!(O #failure f)))
           val failure = follow p's_failure
           val () = O #failure node := SOME failure
           val output =
