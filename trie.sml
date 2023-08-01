@@ -65,16 +65,8 @@ struct
       case HashTable.find (O #goto t) x of
         SOME target => target
       | NONE =>
-          let
-            fun fail failure =
-              case HashTable.find (O #goto failure) x of
-                SOME actual => actual
-              | NONE =>
-                  if Option.isNone (O #parent failure) then failure
-                  else fail (Option.valOf (!(O #failure failure)))
-          in
-            fail (Option.valOf (!(O #failure t)))
-          end
+          if Option.isNone (O #parent t) then t
+          else follow (Option.valOf (!(O #failure t))) x
 
     fun outputs (t: 'a t) =
       let
@@ -137,13 +129,7 @@ struct
           val (x, node) = Queue.dequeue q
           val p: 'a t = Option.valOf (O #parent node)
           val p's_failure: 'a t = Option.valOf (!(O #failure p))
-          fun follow f =
-            case HashTable.find (O #goto f) x of
-              SOME actual => actual
-            | NONE =>
-                if Option.isNone (O #parent f) then root
-                else follow (Option.valOf (!(O #failure f)))
-          val failure = follow p's_failure
+          val failure = follow p's_failure x
           val () = O #failure node := SOME failure
           val output =
             case !(O #pattern failure) of
