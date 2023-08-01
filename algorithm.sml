@@ -52,6 +52,23 @@ struct
     end
 end
 
+structure Vector =
+struct
+  type 'a t = 'a DynamicArray.array
+
+  val mkVector = DynamicArray.array
+  fun top vec =
+    DynamicArray.sub (vec, DynamicArray.bound vec)
+  fun push vec v =
+    DynamicArray.update (vec, DynamicArray.bound vec + 1, v)
+  fun isEmpty vec = DynamicArray.bound vec < 0
+  fun length vec = DynamicArray.bound vec + 1
+  val sub = DynamicArray.sub
+  val update = DynamicArray.update
+  fun pop vec =
+    top vec before DynamicArray.truncate (vec, length vec - 1)
+end
+
 structure LabelledTree =
 struct
   open LabelledTree
@@ -77,9 +94,9 @@ fun run pattern subject =
     val () = List.app (Trie.add trie) paths
     val () = Trie.compute trie
     val first = Trie.Node.follow (#root trie) (LabelledTree.label subject)
-    val label = {node = subject, state = first, visited = ~1}
-    val stack = DynamicArray.array (100, label)
-    val () = DynamicArray.update (stack, DynamicArray.bound stack + 1, label)
+    val label = {node = subject, state = first, visited = ref ~1}
+    val stack = Vector.mkVector (100, label)
+    val () = Vector.push stack label
     fun tabulate state =
       let
         val outs = Trie.Node.outputs state
@@ -87,8 +104,7 @@ fun run pattern subject =
           let
             val out' = List.filter (fn Label _ => true | _ => false) out
             val len = List.length out'
-            val entry = DynamicArray.sub
-              (stack, DynamicArray.bound stack + 1 - len)
+            val entry = Vector.sub (stack, Vector.length stack - len)
             val () = #hits (#node entry) := !(#hits (#node entry)) + 1
           in
             if !(#hits (#node entry)) = List.length paths then
@@ -101,5 +117,23 @@ fun run pattern subject =
       end
     val () = tabulate first
   in
-    ()
+    while not (Vector.isEmpty stack) do
+      let
+        val {node, state, visited} = Vector.top stack
+      in
+        if !visited = LabelledTree.arity node - 1 then
+          ignore (Vector.pop stack)
+        else
+          let
+            val () = visited := !visited + 1
+            val intState = Trie.Node.follow state (Child (!visited))
+            val () = tabulate intState
+            val node' = LabelledTree.child (!visited) node
+            val state' = Trie.Node.follow intState (LabelledTree.label node')
+          in
+            Vector.push stack {node = node', state = state', visited = ref ~1};
+            tabulate state'
+          end
+      end;
+    print (LabelledTree.show subject ^ "\n")
   end
