@@ -54,19 +54,19 @@ end
 
 structure Vector =
 struct
-  type 'a t = 'a DynamicArray.array
+  type 'a t = 'a DynamicArray.array * int ref
 
-  val mkVector = DynamicArray.array
-  fun top vec =
-    DynamicArray.sub (vec, DynamicArray.bound vec)
-  fun push vec v =
-    DynamicArray.update (vec, DynamicArray.bound vec + 1, v)
-  fun isEmpty vec = DynamicArray.bound vec < 0
-  fun length vec = DynamicArray.bound vec + 1
-  val sub = DynamicArray.sub
-  val update = DynamicArray.update
-  fun pop vec =
-    top vec before DynamicArray.truncate (vec, length vec - 1)
+  fun mkVector t = (DynamicArray.array t, ref 0)
+  fun top (vec, len) =
+    DynamicArray.sub (vec, !len - 1)
+  fun push (vec, len) v =
+    (DynamicArray.update (vec, !len, v); len := !len + 1)
+  fun isEmpty (_, len) = !len <= 0
+  fun length (_, len) = !len
+  fun sub (vec, _) a = DynamicArray.sub (vec, a)
+  fun update (vec, _) a b = DynamicArray.update (vec, a, b)
+  fun pop (vec as (_, len)) =
+    top vec before len := !len - 1
 end
 
 structure LabelledTree =
@@ -104,7 +104,7 @@ fun run pattern subject =
           let
             val out' = List.filter (fn Label _ => true | _ => false) out
             val len = List.length out'
-            val entry = Vector.sub (stack, Vector.length stack - len)
+            val entry = Vector.sub stack (Vector.length stack - len)
             val () = #hits (#node entry) := !(#hits (#node entry)) + 1
           in
             if !(#hits (#node entry)) = List.length paths then
