@@ -3,6 +3,7 @@ $(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
 ann "milletDiagnosticsIgnore all" in
   lib/github.com/DarinM223/extended-basis/basis.mlb
   lib/github.com/DarinM223/generic/lib-all.mlb
+  lexer.lex.sml
 end
 utils.sml
 tree.sml
