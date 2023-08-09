@@ -8,9 +8,10 @@ functor TreeFn(P: P) =
 struct
   datatype t' = Node of string * t list | Wildcard
   withtype t = t' P.t
+
   local
     val rec t = fn t'_1 => P.show t'_1
-    and rec t' = fn t_0 =>
+    and t' = fn t_0 =>
       fn Node (t0, t1) =>
         "Node " ^ "("
         ^
@@ -20,7 +21,7 @@ struct
           ] ^ ")"
        | Wildcard => "Wildcard"
     val t_t' = fn () =>
-      let val rec t'_1 = fn ? => t' t_0 ? and rec t_0 = fn ? => t t'_1 ?
+      let val rec t'_1 = fn ? => t' t_0 ? and t_0 = fn ? => t t'_1 ?
       in (t_0, t'_1)
       end
   in val show = #1 (t_t' ()) val showT' = #2 (t_t' ())
