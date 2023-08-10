@@ -12,7 +12,8 @@ val symbol =
   end
 
 structure Trie =
-  TrieFn (struct type t = symbol val hash = Generic.hash symbol end)
+  TrieFn
+    (struct type t = symbol val hash = Word32.toWord o Generic.hash symbol end)
 
 structure Tree =
 struct
