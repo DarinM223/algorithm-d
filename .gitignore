@@ -1,2 +1,5 @@
 algorithmd
 lib/
+lexer.lex.sml
+parser.grm.sig
+parser.grm.sml

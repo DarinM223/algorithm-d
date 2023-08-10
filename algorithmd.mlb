@@ -1,12 +1,18 @@
 $(SML_LIB)/basis/basis.mlb
 $(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
+$(SML_LIB)/mlyacc-lib/mlyacc-lib.mlb
 ann "milletDiagnosticsIgnore all" in
   lib/github.com/DarinM223/extended-basis/basis.mlb
   lib/github.com/DarinM223/generic/lib-all.mlb
-  lexer.lex.sml
 end
 utils.sml
 tree.sml
+ann "milletDiagnosticsIgnore all" in
+  parser.grm.sig
+  parser.grm.sml
+  lexer.lex.sml
+  parser.sml
+end
 trie.sml
 algorithm.sml
 main.sml

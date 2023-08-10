@@ -1,10 +1,17 @@
-datatype lexresult = LPAREN | RPAREN | COMMA | WILD | ID of string | EOF
+(* All of these type aliases are necessary to work with mlyacc *)
+(* Tokens is the structure passed as a parameter to PatternLexFun *)
+type pos = int
+type svalue = Tokens.svalue
+type ('a, 'b) token = ('a, 'b) Tokens.token
+type lexresult = (svalue, pos) token
 
-val eof = fn () => EOF
+(* pos is necessary to work with mlyacc *)
+val pos = ref 0
+val eof = fn () => Tokens.EOF (!pos, !pos)
 
 %%
 
-%structure Lex
+%header (functor PatternLexFun(structure Tokens : Pattern_TOKENS));
 
 alpha=[A-Za-z];
 digit=[0-9];
@@ -12,10 +19,10 @@ ws=[\ \t];
 
 %%
 
-\n => (lex());
+\n => (pos := !pos + 1; lex());
 {ws}+ => (lex());
-"(" => (LPAREN);
-")" => (RPAREN);
-"," => (COMMA);
-"_" => (WILD);
-{alpha}+ => (ID yytext);
+"(" => (Tokens.LPAREN (!pos, !pos));
+")" => (Tokens.RPAREN (!pos, !pos));
+"," => (Tokens.COMMA (!pos, !pos));
+"_" => (Tokens.WILD (!pos, !pos));
+{alpha}+ => (Tokens.ID (yytext, !pos, !pos));

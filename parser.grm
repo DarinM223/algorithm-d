@@ -1,0 +1,20 @@
+%%
+
+%name Pattern
+
+%pos int
+
+%term LPAREN | RPAREN | COMMA | WILD | ID of string | EOF
+
+%nonterm START of Tree.t option | TREE of Tree.t | TREE' of Tree.t list
+
+%%
+
+START : TREE (SOME TREE)
+      |      (NONE)
+
+TREE : ID LPAREN TREE'  (Tree.Node (ID, TREE'))
+     | WILD             (Tree.Wildcard)
+
+TREE' : TREE COMMA TREE' (TREE :: TREE')
+      | RPAREN           ([])

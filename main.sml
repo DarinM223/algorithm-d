@@ -24,8 +24,4 @@ val _ = print "Labelled tree instantiated from subject tree:\n"
 val _ = print (LabelledTree.show tree2 ^ "\n\n")
 
 val inputString = TextIO.openString "((hello, world), _, _)"
-val lexer = Lex.makeLexer (fn n => TextIO.inputN (inputString, n))
-val tok: Lex.UserDeclarations.lexresult option ref = ref NONE
-val () =
-  while (tok := SOME (lexer ()); !tok <> SOME Lex.UserDeclarations.EOF) do
-    print (Lex.UserDeclarations.showLexresult (Option.valOf (!tok)) ^ "\n")
+val lexer = PatternLex.makeLexer (fn n => TextIO.inputN (inputString, n))
