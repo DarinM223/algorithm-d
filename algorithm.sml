@@ -84,8 +84,6 @@ struct
      | _ => raise Fail "Must have an ith child!"
 end
 
-val parse: string -> Tree.t = fn _ => raise Fail ""
-
 fun run pattern subject =
   let
     val pattern = parse pattern

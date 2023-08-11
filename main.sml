@@ -23,5 +23,9 @@ val _ = print (showPattern_paths paths ^ "\n\n")
 val _ = print "Labelled tree instantiated from subject tree:\n"
 val _ = print (LabelledTree.show tree2 ^ "\n\n")
 
-val inputString = TextIO.openString "((hello, world), _, _)"
-val lexer = PatternLex.makeLexer (fn n => TextIO.inputN (inputString, n))
+val _ = run "f(x)" "z(f(x, u), f(x), f(x))"
+val _ = print "\n"
+val _ = run "a(a(b, _), c)" "z(f(x, u), a(a(b, f(x)), c), a(a(b, f(x)), d))"
+val _ = print "\n"
+val _ = run "g(_)" "f(g(g(f(g(x)))))"
+val _ = print "\n"

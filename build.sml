@@ -65,6 +65,7 @@ fun useProject root' file =
     use file;
     OS.FileSys.chDir root
   end;
+PolyML.SaveState.loadState "save" handle _ => (
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/list-format-sig.sml";
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/dynamic-array-sig.sml";
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/dynamic-array.sml";
@@ -213,6 +214,7 @@ use "lib/github.com/DarinM223/parsec/public/parsec.sig";
 use "lib/github.com/DarinM223/parsec/detail/mk-parsec.fun";
 use "lib/github.com/DarinM223/parsec/public/export.sml";
 useProject "lib/github.com/DarinM223/generic" "lib-all.sml";
+PolyML.SaveState.saveState "save" );
 use "utils.sml";
 use "tree.sml";
 use "parser.grm.sig";

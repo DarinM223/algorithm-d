@@ -6,6 +6,9 @@
 
 %term LPAREN | RPAREN | COMMA | WILD | ID of string | EOF
 
+%eop EOF
+%noshift EOF
+
 %nonterm START of Tree.t option | TREE of Tree.t | TREE' of Tree.t list
 
 %%
@@ -13,8 +16,9 @@
 START : TREE (SOME TREE)
       |      (NONE)
 
-TREE : ID LPAREN TREE'  (Tree.Node (ID, TREE'))
-     | WILD             (Tree.Wildcard)
+TREE : ID                      (Tree.Node (ID, []))
+     | WILD                    (Tree.Wildcard)
+     | ID LPAREN TREE' RPAREN  (Tree.Node (ID, TREE'))
 
-TREE' : TREE COMMA TREE' (TREE :: TREE')
-      | RPAREN           ([])
+TREE' : TREE               ([TREE])
+      | TREE COMMA TREE'  (TREE :: TREE')
