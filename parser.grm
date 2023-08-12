@@ -18,7 +18,7 @@ START : TREE (SOME TREE)
 
 TREE : ID                      (Tree.Node (ID, []))
      | WILD                    (Tree.Wildcard)
-     | ID LPAREN TREE' RPAREN  (Tree.Node (ID, TREE'))
+     | ID LPAREN TREE' RPAREN  (Tree.Node (ID, rev TREE'))
 
-TREE' : TREE               ([TREE])
-      | TREE COMMA TREE'  (TREE :: TREE')
+TREE' : TREE             ([TREE])
+      | TREE' COMMA TREE (TREE :: TREE')
