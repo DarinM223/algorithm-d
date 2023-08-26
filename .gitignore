@@ -3,4 +3,8 @@ lib/
 lexer.lex.sml
 parser.grm.sig
 parser.grm.sml
+mlkit-stubs.sml
+MLB/
+smlnj-lib.mlb
 save
+run
