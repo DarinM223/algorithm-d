@@ -28,7 +28,7 @@ struct
   end
 end
 
-structure Tree = TreeFn (struct type 'a t = 'a val show = fn f => f end)
+structure Tree = TreeFn (type 'a t = 'a val show = fn f => f)
 
 structure Labelled =
 struct

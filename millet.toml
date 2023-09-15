@@ -1,0 +1,6 @@
+version = 1
+[workspace]
+root = "algorithmd.mlb"
+[diagnostics]
+5043.severity = "ignore"
+5034.severity = "ignore"
