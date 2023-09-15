@@ -1,0 +1,18 @@
+$(SML_LIB)/basis/basis.mlb
+smlnj-lib.mlb
+$(SML_LIB)/ml-yacc-lib/ml-yacc-lib.mlb
+ann "milletDiagnosticsIgnore all" in
+  lib/github.com/DarinM223/extended-basis/basis.mlkit.mlb
+  lib/github.com/DarinM223/generic/lib-all.mlkit.mlb
+end
+utils.sml
+tree.sml
+ann "milletDiagnosticsIgnore all" in
+  parser.grm.sig
+  parser.grm.sml
+  lexer.lex.sml
+end
+parser.sml
+trie.sml
+algorithm.sml
+main.sml
