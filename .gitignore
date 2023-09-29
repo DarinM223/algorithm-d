@@ -8,3 +8,8 @@ MLB/
 smlnj-lib.mlb
 save
 run
+Main.sml
+algorithmd.smlnet
+*.exe
+*.il
+.smlnetobj/

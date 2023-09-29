@@ -1,18 +1,21 @@
 infix +`
 
-datatype symbol = Label of string | Child of int
-val symbol =
-  let
-    open Generic
-  in
-    data' (C1' "Label" string +` C1' "Child" int)
-      ( fn Child ? => INR ? | Label ? => INL ?
-      , fn INR ? => Child ? | INL ? => Label ?
-      )
-  end
+structure Symbol =
+struct
+  datatype t = Label of string | Child of int
+  val t =
+    let
+      open Generic
+    in
+      data' (C1' "Label" string +` C1' "Child" int)
+        ( fn Child ? => INR ? | Label ? => INL ?
+        , fn INR ? => Child ? | INL ? => Label ?
+        )
+    end
+end
 
 structure Trie =
-  TrieFn (type t = symbol val hash = Word32.toWord o Generic.hash symbol)
+  TrieFn (type t = Symbol.t val hash = Word32.toWord o Generic.hash Symbol.t)
 
 structure Tree =
 struct
@@ -35,7 +38,8 @@ struct
   (* Returns a list of all paths from the pattern tree. *)
   fun toPaths tree =
     let
-      val paths: symbol list list ref = ref []
+      open Symbol
+      val paths: t list list ref = ref []
       fun go acc (Tree.Node (f, [])) =
             paths := List.rev (Label (f ^ "0") :: acc) :: !paths
         | go acc (Tree.Node (f, xs)) =
@@ -73,8 +77,9 @@ structure LabelledTree =
 struct
   open LabelledTree
 
-  val label: t -> symbol =
-    fn {value = Node (x, xs), ...} => Label (x ^ Int.toString (List.length xs))
+  val label: t -> Symbol.t =
+    fn {value = Node (x, xs), ...} =>
+      Symbol.Label (x ^ Int.toString (List.length xs))
      | _ => raise Fail "Tree must be root labelled!"
   val arity: t -> int =
     fn {value = Node (_, xs), ...} => List.length xs | _ => 0
@@ -83,55 +88,59 @@ struct
      | _ => raise Fail "Must have an ith child!"
 end
 
-fun run pattern subject =
-  let
-    val pattern = parse pattern
-    val subject = Tree.instantiate (parse subject)
-    val paths = Tree.toPaths pattern
-    val trie = Trie.create ()
-    val () = List.app (Trie.add trie) paths
-    val () = Trie.compute trie
-    val first = Trie.Node.follow (#root trie) (LabelledTree.label subject)
-    val label = {node = subject, state = first, visited = ref ~1}
-    val stack = Vector.mkVector (100, label)
-    val () = Vector.push stack label
-    fun tabulate state =
-      let
-        val outs = Trie.Node.outputs state
-        fun register out =
-          let
-            val out' = List.filter (fn Label _ => true | _ => false) out
-            val len = List.length out'
-            val entry = Vector.sub stack (Vector.length stack - len)
-            val () = #hits (#node entry) := !(#hits (#node entry)) + 1
-          in
-            if !(#hits (#node entry)) = List.length paths then
-              #matches (#node entry) := true
-            else
-              ()
-          end
-      in
-        List.app register outs
-      end
-    val () = tabulate first
-  in
-    while not (Vector.isEmpty stack) do
-      let
-        val {node, state, visited} = Vector.top stack
-      in
-        if !visited = LabelledTree.arity node - 1 then
-          ignore (Vector.pop stack)
-        else
-          let
-            val () = visited := !visited + 1
-            val intState = Trie.Node.follow state (Child (!visited))
-            val () = tabulate intState
-            val node' = LabelledTree.child (!visited) node
-            val state' = Trie.Node.follow intState (LabelledTree.label node')
-          in
-            Vector.push stack {node = node', state = state', visited = ref ~1};
-            tabulate state'
-          end
-      end;
-    print (LabelledTree.show subject ^ "\n")
-  end
+structure Algorithm =
+struct
+  fun run pattern subject =
+    let
+      open Symbol
+      val pattern = parse pattern
+      val subject = Tree.instantiate (parse subject)
+      val paths = Tree.toPaths pattern
+      val trie = Trie.create ()
+      val () = List.app (Trie.add trie) paths
+      val () = Trie.compute trie
+      val first = Trie.Node.follow (#root trie) (LabelledTree.label subject)
+      val label = {node = subject, state = first, visited = ref ~1}
+      val stack = Vector.mkVector (100, label)
+      val () = Vector.push stack label
+      fun tabulate state =
+        let
+          val outs = Trie.Node.outputs state
+          fun register out =
+            let
+              val out' = List.filter (fn Label _ => true | _ => false) out
+              val len = List.length out'
+              val entry = Vector.sub stack (Vector.length stack - len)
+              val () = #hits (#node entry) := !(#hits (#node entry)) + 1
+            in
+              if !(#hits (#node entry)) = List.length paths then
+                #matches (#node entry) := true
+              else
+                ()
+            end
+        in
+          List.app register outs
+        end
+      val () = tabulate first
+    in
+      while not (Vector.isEmpty stack) do
+        let
+          val {node, state, visited} = Vector.top stack
+        in
+          if !visited = LabelledTree.arity node - 1 then
+            ignore (Vector.pop stack)
+          else
+            let
+              val () = visited := !visited + 1
+              val intState = Trie.Node.follow state (Child (!visited))
+              val () = tabulate intState
+              val node' = LabelledTree.child (!visited) node
+              val state' = Trie.Node.follow intState (LabelledTree.label node')
+            in
+              Vector.push stack {node = node', state = state', visited = ref ~1};
+              tabulate state'
+            end
+        end;
+      print (LabelledTree.show subject ^ "\n")
+    end
+end
