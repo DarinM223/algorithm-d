@@ -1,11 +1,11 @@
-infix +`
 
 structure Symbol =
 struct
+  infix +`
   datatype t = Label of string | Child of int
   val t =
     let
-      open Generic
+      open Sum Generic
     in
       data' (C1' "Label" string +` C1' "Child" int)
         ( fn Child ? => INR ? | Label ? => INL ?
@@ -17,7 +17,7 @@ end
 structure Trie =
   TrieFn (type t = Symbol.t val hash = Word32.toWord o Generic.hash Symbol.t)
 
-structure Tree =
+structure Tree1 =
 struct
   open Tree
 
@@ -56,7 +56,7 @@ struct
     end
 end
 
-structure Vector =
+structure Vector1 =
 struct
   type 'a t = 'a DynamicArray.array * int ref
 
@@ -73,7 +73,7 @@ struct
     top vec before len := !len - 1
 end
 
-structure LabelledTree =
+structure LabelledTree1 =
 struct
   open LabelledTree
 
@@ -93,16 +93,16 @@ struct
   fun run pattern subject =
     let
       open Symbol
-      val pattern = parse pattern
-      val subject = Tree.instantiate (parse subject)
-      val paths = Tree.toPaths pattern
+      val pattern = Parser.parse pattern
+      val subject = Tree1.instantiate (Parser.parse subject)
+      val paths = Tree1.toPaths pattern
       val trie = Trie.create ()
       val () = List.app (Trie.add trie) paths
       val () = Trie.compute trie
-      val first = Trie.Node.follow (#root trie) (LabelledTree.label subject)
+      val first = Trie.Node.follow (#root trie) (LabelledTree1.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
-      val stack = Vector.mkVector (100, label)
-      val () = Vector.push stack label
+      val stack = Vector1.mkVector (100, label)
+      val () = Vector1.push stack label
       fun tabulate state =
         let
           val outs = Trie.Node.outputs state
@@ -110,7 +110,7 @@ struct
             let
               val out' = List.filter (fn Label _ => true | _ => false) out
               val len = List.length out'
-              val entry = Vector.sub stack (Vector.length stack - len)
+              val entry = Vector1.sub stack (Vector1.length stack - len)
               val () = #hits (#node entry) := !(#hits (#node entry)) + 1
             in
               if !(#hits (#node entry)) = List.length paths then
@@ -123,21 +123,21 @@ struct
         end
       val () = tabulate first
     in
-      while not (Vector.isEmpty stack) do
+      while not (Vector1.isEmpty stack) do
         let
-          val {node, state, visited} = Vector.top stack
+          val {node, state, visited} = Vector1.top stack
         in
-          if !visited = LabelledTree.arity node - 1 then
-            ignore (Vector.pop stack)
+          if !visited = LabelledTree1.arity node - 1 then
+            ignore (Vector1.pop stack)
           else
             let
               val () = visited := !visited + 1
               val intState = Trie.Node.follow state (Child (!visited))
               val () = tabulate intState
-              val node' = LabelledTree.child (!visited) node
-              val state' = Trie.Node.follow intState (LabelledTree.label node')
+              val node' = LabelledTree1.child (!visited) node
+              val state' = Trie.Node.follow intState (LabelledTree1.label node')
             in
-              Vector.push stack {node = node', state = state', visited = ref ~1};
+              Vector1.push stack {node = node', state = state', visited = ref ~1};
               tabulate state'
             end
         end;

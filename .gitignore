@@ -13,3 +13,4 @@ algorithmd.smlnet
 *.exe
 *.il
 .smlnetobj/
+.cm/

@@ -1,0 +1,8 @@
+group
+    group(deps0.cm)
+    library(../lib/github.com/DarinM223/extended-basis/basis.cm)
+    library(../lib/github.com/DarinM223/generic/lib-all.cm)
+is
+    deps0.cm
+    ../lib/github.com/DarinM223/extended-basis/basis.cm
+    ../lib/github.com/DarinM223/generic/lib-all.cm

@@ -1,0 +1,91 @@
+group
+    library($/basis.cm) - (
+        structure Lazy
+        signature CHAR
+        structure Fn
+        signature FN
+        signature OS
+        structure OS
+        signature REAL
+        structure RealVector
+        signature STREAM
+        signature TEXT
+        signature MONO_ARRAY
+        structure Word64
+        structure Word32
+        structure Word8
+        signature TEXT_IO
+        structure ArraySlice
+        signature VECTOR_SLICE
+        signature STREAM
+        signature OPTION
+        structure LargeReal
+        structure Word
+        structure Real64VectorSlice
+        structure Char
+        structure Ref
+        structure LargeWord
+        structure Real64
+        signature REF
+        signature INT_INF
+        signature INTEGER
+        structure Real64Array
+        structure Text
+        structure FixedInt
+        structure Word8VectorSlice
+        signature VECTOR
+        structure CharVectorSlice
+        signature STRING
+        signature WORD
+        structure CharVector
+        signature STREAM
+        structure Real64ArraySlice
+        structure Word8ArraySlice
+        signature TIME
+        signature MONO_ARRAY_SLICE
+        structure Stream
+        signature ARRAY_SLICE
+        structure Int64
+        structure Int32
+        structure List
+        structure Position
+        structure Int
+        structure Real64Vector
+        structure Option
+        structure Time
+        signature MONO_VECTOR
+        structure RealArray
+        signature OS_FILE_SYS
+        signature LIST
+        structure RealVectorSlice
+        structure RealArraySlice
+        structure String
+        structure SysWord
+        structure CharArray
+        structure VectorSlice
+        signature SUBSTRING
+        structure Substring
+        structure Word8Vector
+        structure LargeInt
+        structure Array
+        signature MONO_VECTOR_SLICE
+        structure CharArraySlice
+        structure Real
+        structure Word8Array
+        structure Bool
+        structure TextIO
+        structure Vector
+        structure IntInf
+        signature ARRAY
+        signature BOOL
+    )
+    library($/smlnj-lib.cm)
+    library($/ml-yacc-lib.cm) - (
+        signature STREAM
+        signature BOOL
+        structure Stream
+    )
+is
+    $/basis.cm
+    $/smlnj-lib.cm
+    $/ml-yacc-lib.cm

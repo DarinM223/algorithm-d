@@ -18,9 +18,9 @@ struct
         ( "a"
         , [Tree.Node ("b", []), Tree.Wildcard, Tree.Node ("c", [Tree.Wildcard])]
         )
-      val tree2 = Tree.instantiate (Tree.Node
+      val tree2 = Tree1.instantiate (Tree.Node
         ("a", [Tree.Node ("b", []), Tree.Node ("c", [Tree.Node ("d", [])])]))
-      val paths = Tree.toPaths tree
+      val paths = Tree1.toPaths tree
 
       val _ = print "Pattern tree:\n"
       val _ = print (Tree.show tree ^ "\n\n")
