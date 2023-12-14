@@ -1,11 +1,2 @@
 group is
-    cm-all/deps1.cm
-    utils.sml
-    tree.sml
-    parser.grm.sig
-    parser.grm.sml
-    lexer.lex.sml
-    parser.sml
-    trie.sml
-    algorithm.sml
-    main.sml
+    cm-all/deps3.cm

@@ -1,0 +1,12 @@
+group
+    group(deps1.cm)
+    source(-)
+is
+    deps1.cm
+    ../utils.sml
+    ../tree.sml
+    ../parser.grm.sig
+    ../parser.grm.sml
+    ../lexer.lex.sml
+    ../parser.sml
+    ../trie.sml

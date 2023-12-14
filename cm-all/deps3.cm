@@ -1,0 +1,7 @@
+group
+    group(deps2.cm)
+    source(-)
+is
+    deps2.cm
+    ../algorithm.sml
+    ../main.sml
