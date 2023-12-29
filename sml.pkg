@@ -1,3 +1,4 @@
 require {
   github.com/DarinM223/generic 0.0.7 #5c4c092658240a14177ba2e2fdd5276c9b167407
+  github.com/DarinM223/dynamic-array 0.0.1 #b08a5de1aee157487d7420d76f826b642a3fbd1e
 }

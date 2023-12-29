@@ -1,5 +1,6 @@
 $(SML_LIB)/basis/basis.mlb
 smlnj-lib.mlb
+lib/github.com/DarinM223/dynamic-array/dynamic-array.mlb
 $(SML_LIB)/ml-yacc-lib/ml-yacc-lib.mlb
 ann "milletDiagnosticsIgnore all" in
   lib/github.com/DarinM223/extended-basis/basis.mlkit.mlb
