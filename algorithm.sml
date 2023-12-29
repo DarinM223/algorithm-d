@@ -1,11 +1,10 @@
-infix +`
-
 structure Symbol =
 struct
+  infix +`
   datatype t = Label of string | Child of int
   val t =
     let
-      open Generic
+      open Sum Generic
     in
       data' (C1' "Label" string +` C1' "Child" int)
         ( fn Child ? => INR ? | Label ? => INL ?
@@ -93,8 +92,8 @@ struct
   fun run pattern subject =
     let
       open Symbol
-      val pattern = parse pattern
-      val subject = Tree.instantiate (parse subject)
+      val pattern = Parser.parse pattern
+      val subject = Tree.instantiate (Parser.parse subject)
       val paths = Tree.toPaths pattern
       val trie = Trie.create ()
       val () = List.app (Trie.add trie) paths
