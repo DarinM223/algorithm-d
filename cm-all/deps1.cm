@@ -6,3 +6,4 @@ is
     deps0.cm
     ../lib/github.com/DarinM223/extended-basis/basis.cm
     ../lib/github.com/DarinM223/generic/lib-all.cm
+    ../lib/github.com/DarinM223/sml-bitvector/sml-bitvector.cm

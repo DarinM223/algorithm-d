@@ -28,8 +28,8 @@ struct
       val _ = print "Pattern paths:\n"
       val _ = print (showPattern_paths paths ^ "\n\n")
 
-      val _ = print "Labelled tree instantiated from subject tree:\n"
-      val _ = print (LabelledTree.show tree2 ^ "\n\n")
+      val _ = print "Labelled counter tree instantiated from subject tree:\n"
+      val _ = print (TreeWithCounter.show tree2 ^ "\n\n")
 
       val _ = Algorithm.run "f(x)" "z(f(x, u), f(x), f(x))"
       val _ = print "\n"

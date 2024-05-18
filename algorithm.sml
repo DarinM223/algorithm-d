@@ -21,13 +21,13 @@ struct
   open Tree
 
   (* Creates a labelled tree from the main tree to do matches on. *)
-  fun instantiate (t: Tree.t) : LabelledTree.t =
+  fun instantiate (t: Tree.t) : TreeWithCounter.t =
     case t of
       Tree.Node (x, xs) =>
         let
           val xs' = List.map instantiate xs
         in
-          { value = LabelledTree.Node (x, xs')
+          { value = TreeWithCounter.Node (x, xs')
           , hits = ref 0
           , matches = ref false
           }
@@ -66,9 +66,9 @@ struct
   val pop = fn v => top v before DynamicArray.truncate (v, DynamicArray.bound v)
 end
 
-structure LabelledTree =
+structure TreeWithCounter =
 struct
-  open LabelledTree
+  open TreeWithCounter
 
   val label: t -> Symbol.t =
     fn {value = Node (x, xs), ...} =>
@@ -92,7 +92,7 @@ struct
       val trie = Trie.create ()
       val () = List.app (Trie.add trie) paths
       val () = Trie.compute trie
-      val first = Trie.Node.follow (#root trie) (LabelledTree.label subject)
+      val first = Trie.Node.follow (#root trie) (TreeWithCounter.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
       val stack = S.array (100, label)
       val () = S.push (stack, label)
@@ -120,20 +120,21 @@ struct
         let
           val {node, state, visited} = S.top stack
         in
-          if !visited = LabelledTree.arity node - 1 then
+          if !visited = TreeWithCounter.arity node - 1 then
             ignore (S.pop stack)
           else
             let
               val () = visited := !visited + 1
               val intState = Trie.Node.follow state (Child (!visited))
               val () = tabulate intState
-              val node' = LabelledTree.child (!visited) node
-              val state' = Trie.Node.follow intState (LabelledTree.label node')
+              val node' = TreeWithCounter.child (!visited) node
+              val state' =
+                Trie.Node.follow intState (TreeWithCounter.label node')
             in
               S.push (stack, {node = node', state = state', visited = ref ~1});
               tabulate state'
             end
         end;
-      print (LabelledTree.show subject ^ "\n")
+      print (TreeWithCounter.show subject ^ "\n")
     end
 end

@@ -30,7 +30,7 @@ end
 
 structure Tree = TreeFn (type 'a t = 'a val show = fn f => f)
 
-structure Labelled =
+structure WithCounter =
 struct
   type 'a t = {value: 'a, hits: int ref, matches: bool ref}
   val show = fn a_ =>
@@ -44,4 +44,4 @@ struct
         ] ^ "}"
 end
 
-structure LabelledTree = TreeFn(Labelled)
+structure TreeWithCounter = TreeFn(WithCounter)

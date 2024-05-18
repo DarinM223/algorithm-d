@@ -65,7 +65,11 @@ fun useProject root' file =
     use file;
     OS.FileSys.chDir root
   end;
+(* Uncomment this and put library files in here to prevent reloading them each time. *)
+(*
 PolyML.SaveState.loadState "save" handle _ => (
+PolyML.SaveState.saveState "save" );
+*)
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/list-format-sig.sml";
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/dynamic-array-sig.sml";
 use "/usr/local/lib/mlton/sml/smlnj-lib/Util/dynamic-array.sml";
@@ -183,6 +187,8 @@ use "lib/github.com/DarinM223/dynamic-array/dynamic-array-sig.sml";
 use "lib/github.com/DarinM223/dynamic-array/mono-dynamic-array-sig.sml";
 use "lib/github.com/DarinM223/dynamic-array/dynamic-array.sml";
 use "lib/github.com/DarinM223/dynamic-array/dynamic-array-fn.sml";
+use "lib/github.com/DarinM223/sml-bitvector/bitvector.sig";
+use "lib/github.com/DarinM223/sml-bitvector/bitvector.sml";
 use "/usr/local/lib/mlton/sml/mlyacc-lib/base.sig";
 use "/usr/local/lib/mlton/sml/mlyacc-lib/join.sml";
 use "/usr/local/lib/mlton/sml/mlyacc-lib/lrtable.sml";
@@ -365,10 +371,6 @@ use "lib/github.com/DarinM223/extended-basis/public/export/export.common.sml";
 use "lib/github.com/DarinM223/extended-basis/public/export/top-level.sml";
 use "lib/github.com/DarinM223/extended-basis/public/export/open-top-level.sml";
 use "lib/github.com/DarinM223/extended-basis/public/export/infixes.sml";
-use "lib/github.com/DarinM223/prettier/public/prettier.sig";
-use "lib/github.com/DarinM223/prettier/detail/prettier.sml";
-use "lib/github.com/DarinM223/prettier/public/export.sml";
-use "lib/github.com/DarinM223/prettier/public/infixes.sml";
 use "lib/github.com/DarinM223/random/public/rng.sig";
 use "lib/github.com/DarinM223/random/public/random-gen.sig";
 use "lib/github.com/DarinM223/random/detail/mk-random-gen.fun";
@@ -379,6 +381,10 @@ use "lib/github.com/DarinM223/random/detail/ranqd1-gen.sml";
 use "lib/github.com/DarinM223/random/public/random-dev.sig";
 use "lib/github.com/DarinM223/random/detail/ml/random-dev.common.sml";
 use "lib/github.com/DarinM223/random/public/export.sml";
+use "lib/github.com/DarinM223/prettier/public/prettier.sig";
+use "lib/github.com/DarinM223/prettier/detail/prettier.sml";
+use "lib/github.com/DarinM223/prettier/public/export.sml";
+use "lib/github.com/DarinM223/prettier/public/infixes.sml";
 use "lib/github.com/DarinM223/ds/public/node.sig";
 use "lib/github.com/DarinM223/ds/detail/node.sml";
 use "lib/github.com/DarinM223/ds/public/queue.sig";
@@ -477,8 +483,10 @@ use "lib/github.com/DarinM223/generic/with/hash.sml";
 use "lib/github.com/DarinM223/generic/with/uniplate.sml";
 use "lib/github.com/DarinM223/generic/with/ord.sml";
 use "lib/github.com/DarinM223/generic/with/pretty.sml";
+use "lib/github.com/DarinM223/generic/with/arbitrary.sml";
+use "lib/github.com/DarinM223/generic/with/size.sml";
+use "lib/github.com/DarinM223/generic/with/shrink.sml";
 use "lib/github.com/DarinM223/generic/with/close-pretty-with-extra.sml";
-PolyML.SaveState.saveState "save" );
 use "utils.sml";
 use "tree.sml";
 use "parser.grm.sig";
