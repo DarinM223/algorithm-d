@@ -40,10 +40,8 @@ struct
       !paths
     end
 
-  fun largestPathSize tree =
-    let val paths = toPaths tree
-    in foldl (fn (path, acc) => Int.max (length path, acc)) 0 paths
-    end
+  val largestPathSize =
+    foldl (fn (path, acc) => Int.max (length path, acc)) 0 o toPaths
 
   (* Creates a labelled counter tree from the main tree to do matches on. *)
   fun instantiateCounter (t: Tree.t) : TreeWithCounter.t =
@@ -60,17 +58,23 @@ struct
     | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
 
   fun instantiateBitset (t: Tree.t) : TreeWithBitset.t =
-    case t of
-      Tree.Node (x, xs) =>
-        let
-          val xs' = List.map instantiateBitset xs
-        in
-          { value = TreeWithBitset.Node (x, xs')
-          , bitset = Word8BitVector.create (largestPathSize t)
-          , matches = ref false
-          }
-        end
-    | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
+    let
+      val largestPathSize = largestPathSize t + 1
+      fun go t =
+        case t of
+          Tree.Node (x, xs) =>
+            let
+              val xs' = List.map go xs
+            in
+              { value = TreeWithBitset.Node (x, xs')
+              , bitset = Word8BitVector.create largestPathSize
+              , matches = ref false
+              }
+            end
+        | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
+    in
+      go t
+    end
 end
 
 structure S =

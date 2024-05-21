@@ -50,12 +50,12 @@ structure WithBitset =
 struct
   type 'a t = {value: 'a, bitset: Word8BitVector.t, matches: bool ref}
   val show = fn a_ =>
-    fn {value = t0, bitset = _, matches = ref t2} =>
+    fn {value = t0, bitset = t1, matches = ref t2} =>
       "{"
       ^
       String.concatWith ", "
         [ "value = " ^ a_ t0
-        (* , "bitset = " ^ Word8BitVector.show t1 *)
+        , "bitset = " ^ Word8BitVector.toString t1
         , "matches = " ^ "ref " ^ Bool.toString t2
         ] ^ "}"
 end

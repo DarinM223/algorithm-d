@@ -1,5 +1,5 @@
 require {
-  github.com/DarinM223/generic 0.0.7 #5c4c092658240a14177ba2e2fdd5276c9b167407
+  github.com/DarinM223/generic 0.0.8 #b0c238994db703fb7260bcfaec392c98f1237ea1
   github.com/DarinM223/dynamic-array 0.0.1 #b08a5de1aee157487d7420d76f826b642a3fbd1e
-  github.com/DarinM223/sml-bitvector 0.0.3 #de713b5fcb1349c1d78da9de6289cb25730b00a2
+  github.com/DarinM223/sml-bitvector 0.0.4 #80f7a551955c3cbbc3f5ecc7891be2cb39d3900d
 }
