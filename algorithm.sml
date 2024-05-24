@@ -191,35 +191,47 @@ struct
       val label = {node = subject, state = first, visited = ref ~1}
       val stack = S.array (100, label)
       val () = S.push (stack, label)
-      fun tabulate state =
+      fun tabulate (node: TreeWithBitset.t) state =
         let
           val outs = Trie.Node.outputs state
           fun register out =
             let
               val out' = List.filter (fn Label _ => true | _ => false) out
-              val len = List.length out'
-              val entry = S.sub (stack, S.length stack - len)
-            (* val () = #hits (#node entry) := !(#hits (#node entry)) + 1 *)
+              val len = List.length out' - 1
             in
-              ()
-            (* if !(#hits (#node entry)) = List.length paths then
-              #matches (#node entry) := true
-            else
-              () *)
+              Word8BitVector.set len true (#bitset node)
             end
         in
-          List.app register outs
-        (* TODO: for every child of node, shift its bit string right 1 bit and bitwise oring their logical product with the current bit string *)
+          List.app register outs;
+          (* For every child of node, shift its bit string right 1 bit and bitwise and them together, then bitwise or
+             the result with the original bit string *)
+          case node of
+            {value = TreeWithBitset.Node (_, child :: children), ...} =>
+              let
+                open Word8BitVector
+                val bitset = clone (#bitset child)
+                val () = shr 1 bitset
+                val () =
+                  List.app
+                    (fn child => let val bitset' = clone (#bitset child)
+                                 in shr 1 bitset'; andd bitset bitset'
+                                 end) children
+              in
+                or (#bitset node) bitset
+              end
+          | _ => ();
+          (* Pattern matches at that node if the first bit in the bitset is set *)
+          if Word8BitVector.get 0 (#bitset node) then #matches node := true
+          else ()
         end
-      val () = tabulate first
+      val () = tabulate subject first
     in
       while not (S.isEmpty stack) do
         let
           val {node, state, visited} = S.top stack
         in
           if !visited = TreeWithBitset.arity node - 1 then
-            (* TODO: All children visited calculate the node's bitset from its children *)
-            (tabulate state; ignore (S.pop stack))
+            (tabulate node state; ignore (S.pop stack))
           else
             let
               val () = visited := !visited + 1

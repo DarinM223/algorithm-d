@@ -31,13 +31,25 @@ struct
       val _ = print "Labelled counter tree instantiated from subject tree:\n"
       val _ = print (TreeWithCounter.show tree2 ^ "\n\n")
 
+      val _ = print "First test:\n"
       val _ = Algorithm.run "f(x)" "z(f(x, u), f(x), f(x))"
       val _ = print "\n"
+      val _ = AlgorithmWithBitset.run "f(x)" "z(f(x, u), f(x), f(x))"
+      val _ = print "\n\n"
+
+      val _ = print "Second test:\n"
       val _ = Algorithm.run "a(a(b, _), c)"
         "z(f(x, u), a(a(b, f(x)), c), a(a(b, f(x)), d))"
       val _ = print "\n"
+      val _ = AlgorithmWithBitset.run "a(a(b, _), c)"
+        "z(f(x, u), a(a(b, f(x)), c), a(a(b, f(x)), d))"
+      val _ = print "\n\n"
+
+      val _ = print "Third test:\n"
       val _ = Algorithm.run "g(_)" "f(g(g(f(g(x)))))"
       val _ = print "\n"
+      val _ = AlgorithmWithBitset.run "g(_)" "f(g(g(f(g(x)))))"
+      val _ = print "\n\n"
     in
       ()
     end
