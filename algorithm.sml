@@ -184,6 +184,16 @@ struct
       val pattern = Parser.parse pattern
       val subject = Tree.instantiateBitset (Parser.parse subject)
       val paths = Tree.toPaths pattern
+      val showPattern_paths = fn t0 =>
+        "["
+        ^
+        String.concatWith ", "
+          (List.map
+             (fn t0 =>
+                "["
+                ^ String.concatWith ", " (List.map (Generic.show Symbol.t) t0)
+                ^ "]") t0) ^ "]"
+      val () = print ("Pattern paths: " ^ showPattern_paths paths)
       val trie = Trie.create ()
       val () = List.app (Trie.add trie) paths
       val () = Trie.compute trie
@@ -202,28 +212,28 @@ struct
               Word8BitVector.set len true (#bitset node)
             end
         in
-          List.app register outs;
-          (* For every child of node, shift its bit string right 1 bit and bitwise and them together, then bitwise or
+          List.app register outs
+        end
+      fun merge (node: TreeWithBitset.t) =
+        ( (* For every child of node, shift its bit string right 1 bit and bitwise and them together, then bitwise or
              the result with the original bit string *)
           case node of
             {value = TreeWithBitset.Node (_, child :: children), ...} =>
               let
                 open Word8BitVector
-                val bitset = clone (#bitset child)
-                val () = shr 1 bitset
-                val () =
-                  List.app
-                    (fn child => let val bitset' = clone (#bitset child)
-                                 in shr 1 bitset'; andd bitset bitset'
-                                 end) children
+                val bitsetDivTwo = fn bitset => let val bitset' = clone bitset
+                                                in shr 1 bitset'; bitset'
+                                                end
+                val bitset = bitsetDivTwo (#bitset child)
               in
+                List.app (andd bitset o bitsetDivTwo o #bitset) children;
                 or (#bitset node) bitset
               end
-          | _ => ();
-          (* Pattern matches at that node if the first bit in the bitset is set *)
+          | _ => ()
+        ; (* Pattern matches at that node if the first bit in the bitset is set *)
           if Word8BitVector.get 0 (#bitset node) then #matches node := true
           else ()
-        end
+        )
       val () = tabulate subject first
     in
       while not (S.isEmpty stack) do
@@ -231,14 +241,16 @@ struct
           val {node, state, visited} = S.top stack
         in
           if !visited = TreeWithBitset.arity node - 1 then
-            (tabulate node state; ignore (S.pop stack))
+            (merge node; ignore (S.pop stack))
           else
             let
               val () = visited := !visited + 1
               val intState = Trie.Node.follow state (Child (!visited))
               val node' = TreeWithBitset.child (!visited) node
+              val () = tabulate node' intState
               val state' =
                 Trie.Node.follow intState (TreeWithBitset.label node')
+              val () = tabulate node' state'
             in
               S.push (stack, {node = node', state = state', visited = ref ~1})
             end
