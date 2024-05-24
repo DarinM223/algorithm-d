@@ -184,16 +184,6 @@ struct
       val pattern = Parser.parse pattern
       val subject = Tree.instantiateBitset (Parser.parse subject)
       val paths = Tree.toPaths pattern
-      val showPattern_paths = fn t0 =>
-        "["
-        ^
-        String.concatWith ", "
-          (List.map
-             (fn t0 =>
-                "["
-                ^ String.concatWith ", " (List.map (Generic.show Symbol.t) t0)
-                ^ "]") t0) ^ "]"
-      val () = print ("Pattern paths: " ^ showPattern_paths paths)
       val trie = Trie.create ()
       val () = List.app (Trie.add trie) paths
       val () = Trie.compute trie
@@ -201,13 +191,15 @@ struct
       val label = {node = subject, state = first, visited = ref ~1}
       val stack = S.array (100, label)
       val () = S.push (stack, label)
-      fun tabulate (node: TreeWithBitset.t) state =
+      fun tabulate (node: TreeWithBitset.t) state isArity =
         let
           val outs = Trie.Node.outputs state
           fun register out =
             let
               val out' = List.filter (fn Label _ => true | _ => false) out
-              val len = List.length out' - 1
+              (* If the path matches when following an arity, we set the length at the child's depth *)
+              val len =
+                if isArity then List.length out' else List.length out' - 1
             in
               Word8BitVector.set len true (#bitset node)
             end
@@ -234,7 +226,7 @@ struct
           if Word8BitVector.get 0 (#bitset node) then #matches node := true
           else ()
         )
-      val () = tabulate subject first
+      val () = tabulate subject first false
     in
       while not (S.isEmpty stack) do
         let
@@ -247,10 +239,10 @@ struct
               val () = visited := !visited + 1
               val intState = Trie.Node.follow state (Child (!visited))
               val node' = TreeWithBitset.child (!visited) node
-              val () = tabulate node' intState
+              val () = tabulate node' intState true
               val state' =
                 Trie.Node.follow intState (TreeWithBitset.label node')
-              val () = tabulate node' state'
+              val () = tabulate node' state' false
             in
               S.push (stack, {node = node', state = state', visited = ref ~1})
             end
