@@ -201,31 +201,29 @@ struct
               val len =
                 if isArity then List.length out' else List.length out' - 1
             in
-              Word8BitVector.set len true (#bitset node)
+              Word8BitVector.set len true (#bitset node);
+              if len = 0 then #matches node := true else ()
             end
         in
           List.app register outs
         end
       fun merge (node: TreeWithBitset.t) =
-        ( (* For every child of node, shift its bit string right 1 bit and bitwise and them together, then bitwise or
-             the result with the original bit string *)
-          case node of
-            {value = TreeWithBitset.Node (_, child :: children), ...} =>
-              let
-                open Word8BitVector
-                val bitsetDivTwo = fn bitset => let val bitset' = clone bitset
-                                                in shr 1 bitset'; bitset'
-                                                end
-                val bitset = bitsetDivTwo (#bitset child)
-              in
-                List.app (andd bitset o bitsetDivTwo o #bitset) children;
-                or (#bitset node) bitset
-              end
-          | _ => ()
-        ; (* Pattern matches at that node if the first bit in the bitset is set *)
-          if Word8BitVector.get 0 (#bitset node) then #matches node := true
-          else ()
-        )
+        case node of
+          {value = TreeWithBitset.Node (_, child :: children), ...} =>
+            let
+              open Word8BitVector
+              val bitset = clone (#bitset child)
+            in
+              (* For every child of node, shift its bit string right 1 bit
+                 and bitwise and them together (logical product), then bitwise or
+                 the result with the original bit string *)
+              List.app (andd bitset o #bitset) children;
+              shr 1 bitset;
+              or (#bitset node) bitset;
+              if Word8BitVector.get 0 (#bitset node) then #matches node := true
+              else ()
+            end
+        | _ => ()
       val () = tabulate subject first false
     in
       while not (S.isEmpty stack) do
