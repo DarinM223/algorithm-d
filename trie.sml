@@ -15,6 +15,7 @@ struct
         , failure: 'a t option ref
         , output: 'a t option ref
         , pattern: 'a list ref
+        , matchedRules: int list ref
         }
     fun O m (TrieNode t) = m t
 
@@ -37,6 +38,7 @@ struct
             , failure = ref t2
             , output = ref t3
             , pattern = ref t4
+            , matchedRules = ref t5
             } =>
           "TrieNode " ^ "{"
           ^
@@ -47,10 +49,13 @@ struct
             , "output = " ^ "ref " ^ showOption t_0 t3
             , "pattern = " ^ "ref " ^ "["
               ^ String.concatWith ", " (List.map a_ t4) ^ "]"
+            , "matchedRules = " ^ "ref " ^ "["
+              ^ String.concatWith ", " (List.map Int.toString t5) ^ "]"
             ] ^ "}"
       val t = fn a_ => let val rec t_0 = fn ? => t (t_0, a_) ? in t_0 end
     in val show = t
     end
+
 
     fun create parent =
       TrieNode
@@ -59,6 +64,7 @@ struct
         , failure = ref NONE
         , output = ref NONE
         , pattern = ref []
+        , matchedRules = ref []
         }
 
     fun follow (t: 'a t) (x: 'a) =
@@ -70,10 +76,10 @@ struct
 
     fun outputs (t: 'a t) =
       let
-        val out: 'a list list ref = ref []
+        val out: ('a list * int list) list ref = ref []
         fun chase node =
           if not (List.null (!(O #pattern node))) then
-            ( out := !(O #pattern node) :: !out
+            ( out := (!(O #pattern node), !(O #matchedRules node)) :: !out
             ; case !(O #output node) of
                 SOME link => chase link
               | NONE => ()
@@ -90,7 +96,7 @@ struct
 
   val create = fn () => {root = Node.create NONE}
 
-  fun add (trie: NodeType.t t) xs =
+  fun add (trie: NodeType.t t) rule xs =
     let
       open Node
       val node = ref (#root trie)
@@ -108,7 +114,8 @@ struct
         end
     in
       List.app go xs;
-      O #pattern (!node) := xs
+      O #pattern (!node) := xs;
+      O #matchedRules (!node) := rule :: !(O #matchedRules (!node))
     end
 
   fun compute (trie: 'a t) =

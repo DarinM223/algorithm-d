@@ -30,34 +30,43 @@ end
 
 structure Tree = TreeFn (type 'a t = 'a val show = fn f => f)
 
-structure WithCounter =
-struct
-  type 'a t = {value: 'a, hits: int ref, matches: bool ref}
-  val show = fn a_ =>
-    fn {value = t0, hits = ref t1, matches = ref t2} =>
-      "{"
-      ^
-      String.concatWith ", "
-        [ "value = " ^ a_ t0
-        , "hits = " ^ "ref " ^ Int.toString t1
-        , "matches = " ^ "ref " ^ Bool.toString t2
-        ] ^ "}"
+local
+  val showList = fn a_ =>
+    fn t0 => "[" ^ String.concatWith ", " (List.map a_ t0) ^ "]"
+  fun showArray toString = showList toString o Array.toList
+  fun showVector toString = showList toString o Vector.toList
+in
+  structure WithCounter =
+  struct
+    type 'a t = {value: 'a, hits: int array, matches: int list ref}
+    val show = fn a_ =>
+      fn {value = t0, hits = t1, matches = ref t2} =>
+        "{"
+        ^
+        String.concatWith ", "
+          [ "value = " ^ a_ t0
+          , "hits = " ^ showArray Int.toString t1
+          , "matches = " ^ "ref " ^ "["
+            ^ String.concatWith ", " (List.map Int.toString t2) ^ "]"
+          ] ^ "}"
+  end
+
+  structure WithBitset =
+  struct
+    type 'a t =
+      {value: 'a, bitset: Word8BitVector.t vector, matches: int list ref}
+    val show = fn a_ =>
+      fn {value = t0, bitset = t1, matches = ref t2} =>
+        "{"
+        ^
+        String.concatWith ", "
+          [ "value = " ^ a_ t0
+          , "bitset = " ^ showVector Word8BitVector.toString t1
+          , "matches = " ^ "ref " ^ "["
+            ^ String.concatWith ", " (List.map Int.toString t2) ^ "]"
+          ] ^ "}"
+  end
 end
 
 structure TreeWithCounter = TreeFn(WithCounter)
-
-structure WithBitset =
-struct
-  type 'a t = {value: 'a, bitset: Word8BitVector.t, matches: bool ref}
-  val show = fn a_ =>
-    fn {value = t0, bitset = t1, matches = ref t2} =>
-      "{"
-      ^
-      String.concatWith ", "
-        [ "value = " ^ a_ t0
-        , "bitset = " ^ Word8BitVector.toString t1
-        , "matches = " ^ "ref " ^ Bool.toString t2
-        ] ^ "}"
-end
-
 structure TreeWithBitset = TreeFn(WithBitset)

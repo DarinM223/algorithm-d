@@ -7,3 +7,4 @@ is
     ../lib/github.com/DarinM223/extended-basis/basis.cm
     ../lib/github.com/DarinM223/generic/lib-all.cm
     ../lib/github.com/DarinM223/sml-bitvector/sml-bitvector.cm
+    ../lib/github.com/DarinM223/mlton-vector/mlton-vector.cm

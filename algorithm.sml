@@ -44,20 +44,20 @@ struct
     foldl (fn (path, acc) => Int.max (length path, acc)) 0 o toPaths
 
   (* Creates a labelled counter tree from the main tree to do matches on. *)
-  fun instantiateCounter (t: Tree.t) : TreeWithCounter.t =
+  fun instantiateCounter numRules (t: Tree.t) : TreeWithCounter.t =
     case t of
       Tree.Node (x, xs) =>
         let
-          val xs' = List.map instantiateCounter xs
+          val xs' = List.map (instantiateCounter numRules) xs
         in
           { value = TreeWithCounter.Node (x, xs')
-          , hits = ref 0
-          , matches = ref false
+          , hits = Array.array (numRules, 0)
+          , matches = ref []
           }
         end
     | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
 
-  fun instantiateBitset (t: Tree.t) : TreeWithBitset.t =
+  fun instantiateBitset numRules (t: Tree.t) : TreeWithBitset.t =
     let
       val largestPathSize = largestPathSize t + 1
       fun go t =
@@ -67,8 +67,9 @@ struct
               val xs' = List.map go xs
             in
               { value = TreeWithBitset.Node (x, xs')
-              , bitset = Word8BitVector.create largestPathSize
-              , matches = ref false
+              , bitset = Vector.tabulate (numRules, fn _ =>
+                  Word8BitVector.create largestPathSize)
+              , matches = ref []
               }
             end
         | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
@@ -124,10 +125,10 @@ struct
     let
       open Symbol
       val pattern = Parser.parse pattern
-      val subject = Tree.instantiateCounter (Parser.parse subject)
+      val subject = Tree.instantiateCounter 1 (Parser.parse subject)
       val paths = Tree.toPaths pattern
       val trie = Trie.create ()
-      val () = List.app (Trie.add trie) paths
+      val () = List.app (Trie.add trie 0) paths
       val () = Trie.compute trie
       val first = Trie.Node.follow (#root trie) (TreeWithCounter.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
@@ -136,17 +137,23 @@ struct
       fun tabulate state =
         let
           val outs = Trie.Node.outputs state
-          fun register out =
+          fun register (out, rules) =
             let
               val out' = List.filter (fn Label _ => true | _ => false) out
               val len = List.length out'
               val entry = S.sub (stack, S.length stack - len)
-              val () = #hits (#node entry) := !(#hits (#node entry)) + 1
+              fun updateRule rule =
+                let
+                  val hits' = Array.sub (#hits (#node entry), rule) + 1
+                in
+                  Array.update (#hits (#node entry), rule, hits');
+                  if hits' = List.length paths then
+                    #matches (#node entry) := rule :: !(#matches (#node entry))
+                  else
+                    ()
+                end
             in
-              if !(#hits (#node entry)) = List.length paths then
-                #matches (#node entry) := true
-              else
-                ()
+              List.app updateRule rules
             end
         in
           List.app register outs
@@ -182,10 +189,10 @@ struct
     let
       open Symbol
       val pattern = Parser.parse pattern
-      val subject = Tree.instantiateBitset (Parser.parse subject)
+      val subject = Tree.instantiateBitset 1 (Parser.parse subject)
       val paths = Tree.toPaths pattern
       val trie = Trie.create ()
-      val () = List.app (Trie.add trie) paths
+      val () = List.app (Trie.add trie 0) paths
       val () = Trie.compute trie
       val first = Trie.Node.follow (#root trie) (TreeWithBitset.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
@@ -194,15 +201,18 @@ struct
       fun tabulate (node: TreeWithBitset.t) state isArity =
         let
           val outs = Trie.Node.outputs state
-          fun register out =
+          fun register (out, rules) =
             let
               val out' = List.filter (fn Label _ => true | _ => false) out
               (* If the path matches when following an arity, we set the length at the child's depth *)
               val len =
                 if isArity then List.length out' else List.length out' - 1
             in
-              Word8BitVector.set len true (#bitset node);
-              if len = 0 then #matches node := true else ()
+              List.app
+                (fn rule =>
+                   Word8BitVector.set len true (Vector.sub (#bitset node, rule)))
+                rules;
+              if len = 0 then #matches node := rules else ()
             end
         in
           List.app register outs
@@ -211,17 +221,20 @@ struct
         case node of
           {value = TreeWithBitset.Node (_, child :: children), ...} =>
             let
-              open Word8BitVector
-              val bitset = clone (#bitset child)
+              open Word8BitVector MLtonVector
+              val bitset = Vector.map clone (#bitset child)
+              val matchingRules = fn (rule, bits, acc) =>
+                if Word8BitVector.get 0 bits then rule :: acc else acc
             in
               (* For every child of node, shift its bit string right 1 bit
                  and bitwise and them together (logical product), then bitwise or
                  the result with the original bit string *)
-              List.app (andd bitset o #bitset) children;
-              shr 1 bitset;
-              or (#bitset node) bitset;
-              if Word8BitVector.get 0 (#bitset node) then #matches node := true
-              else ()
+              List.app
+                (fn child => foreach2 (bitset, #bitset child, uncurry andd))
+                children;
+              Vector.app (shr 1) bitset;
+              foreach2 (#bitset node, bitset, uncurry or);
+              #matches node := Vector.foldli matchingRules [] (#bitset node)
             end
         | _ => ()
       val () = tabulate subject first false

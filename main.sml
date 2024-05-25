@@ -18,7 +18,7 @@ struct
         ( "a"
         , [Tree.Node ("b", []), Tree.Wildcard, Tree.Node ("c", [Tree.Wildcard])]
         )
-      val tree2 = Tree.instantiateCounter (Tree.Node
+      val tree2 = Tree.instantiateCounter 1 (Tree.Node
         ("a", [Tree.Node ("b", []), Tree.Node ("c", [Tree.Node ("d", [])])]))
       val paths = Tree.toPaths tree
 
