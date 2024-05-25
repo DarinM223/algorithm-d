@@ -57,9 +57,8 @@ struct
         end
     | Tree.Wildcard => raise Fail "Cannot instantiate pattern"
 
-  fun instantiateBitset numRules (t: Tree.t) : TreeWithBitset.t =
+  fun instantiateBitset mkBitset (t: Tree.t) : TreeWithBitset.t =
     let
-      val largestPathSize = largestPathSize t + 1
       fun go t =
         case t of
           Tree.Node (x, xs) =>
@@ -67,8 +66,7 @@ struct
               val xs' = List.map go xs
             in
               { value = TreeWithBitset.Node (x, xs')
-              , bitset = Vector.tabulate (numRules, fn _ =>
-                  Word8BitVector.create largestPathSize)
+              , bitset = mkBitset ()
               , matches = ref []
               }
             end
@@ -189,7 +187,11 @@ struct
     let
       open Symbol
       val pattern = Parser.parse pattern
-      val subject = Tree.instantiateBitset 1 (Parser.parse subject)
+      val largestPathSize = Tree.largestPathSize pattern + 1
+      val subject =
+        Tree.instantiateBitset
+          (fn () => Vector.fromList [Word8BitVector.create largestPathSize])
+          (Parser.parse subject)
       val paths = Tree.toPaths pattern
       val trie = Trie.create ()
       val () = List.app (Trie.add trie 0) paths
