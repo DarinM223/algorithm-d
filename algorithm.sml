@@ -117,16 +117,30 @@ struct
      | _ => raise Fail "Must have an ith child!"
 end
 
-structure Algorithm =
+signature ALGORITHM =
+sig
+  structure ResultTree: TREE
+  val run: string list -> string -> ResultTree.t
+end
+
+structure Algorithm: ALGORITHM =
 struct
-  fun run pattern subject =
+  structure ResultTree = TreeWithCounter
+  fun run patterns subject =
     let
       open Symbol
-      val pattern = Parser.parse pattern
-      val subject = Tree.instantiateCounter 1 (Parser.parse subject)
-      val paths = Tree.toPaths pattern
+      val patterns = List.map Parser.parse patterns
+      val subject =
+        Tree.instantiateCounter (List.length patterns) (Parser.parse subject)
+      val patternPaths =
+        List.foldli
+          (fn (i, tree, acc) =>
+             IntRedBlackMap.insert (acc, i, Tree.toPaths tree))
+          IntRedBlackMap.empty patterns
       val trie = Trie.create ()
-      val () = List.app (Trie.add trie 0) paths
+      val () =
+        IntRedBlackMap.appi (fn (i, paths) => List.app (Trie.add trie i) paths)
+          patternPaths
       val () = Trie.compute trie
       val first = Trie.Node.follow (#root trie) (TreeWithCounter.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
@@ -143,9 +157,11 @@ struct
               fun updateRule rule =
                 let
                   val hits' = Array.sub (#hits (#node entry), rule) + 1
+                  val matchHits = List.length
+                    (IntRedBlackMap.lookup (patternPaths, rule))
                 in
                   Array.update (#hits (#node entry), rule, hits');
-                  if hits' = List.length paths then
+                  if hits' = matchHits then
                     #matches (#node entry) := rule :: !(#matches (#node entry))
                   else
                     ()
@@ -177,24 +193,34 @@ struct
               tabulate state'
             end
         end;
-      print (TreeWithCounter.show subject ^ "\n")
+      print (TreeWithCounter.show subject ^ "\n");
+      subject
     end
 end
 
-structure AlgorithmWithBitset =
+structure AlgorithmWithBitset: ALGORITHM =
 struct
-  fun run pattern subject =
+  structure ResultTree = TreeWithBitset
+  fun run patterns subject =
     let
       open Symbol
-      val pattern = Parser.parse pattern
-      val largestPathSize = Tree.largestPathSize pattern + 1
+      val patterns = List.map Parser.parse patterns
+      val largestPathSizes =
+        List.map (fn pattern => Tree.largestPathSize pattern + 1) patterns
       val subject =
         Tree.instantiateBitset
-          (fn () => Vector.fromList [Word8BitVector.create largestPathSize])
+          (fn () =>
+             Vector.fromList (List.map Word8BitVector.create largestPathSizes))
           (Parser.parse subject)
-      val paths = Tree.toPaths pattern
+      val patternPaths =
+        List.foldli
+          (fn (i, tree, acc) =>
+             IntRedBlackMap.insert (acc, i, Tree.toPaths tree))
+          IntRedBlackMap.empty patterns
       val trie = Trie.create ()
-      val () = List.app (Trie.add trie 0) paths
+      val () =
+        IntRedBlackMap.appi (fn (i, paths) => List.app (Trie.add trie i) paths)
+          patternPaths
       val () = Trie.compute trie
       val first = Trie.Node.follow (#root trie) (TreeWithBitset.label subject)
       val label = {node = subject, state = first, visited = ref ~1}
@@ -260,6 +286,7 @@ struct
               S.push (stack, {node = node', state = state', visited = ref ~1})
             end
         end;
-      print (TreeWithBitset.show subject ^ "\n")
+      print (TreeWithBitset.show subject ^ "\n");
+      subject
     end
 end

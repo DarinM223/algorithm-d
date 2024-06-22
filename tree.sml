@@ -2,9 +2,21 @@ signature P =
 sig
   type 'a t
   val show: ('a -> string) -> 'a t -> string
+  val matches: 'a t -> int list
+  val unwrap: 'a t -> 'a
 end
 
-functor TreeFn(P: P) =
+signature TREE =
+sig
+  type t
+  datatype t' = Node of string * t list | Wildcard
+
+  val show: t -> string
+  val matches: t -> int list
+  val unwrap: t -> t'
+end
+
+functor TreeFn(P: P): TREE =
 struct
   datatype t' = Node of string * t list | Wildcard
   withtype t = t' P.t
@@ -26,9 +38,17 @@ struct
       end
   in val show = #1 (t_t' ()) val showT' = #2 (t_t' ())
   end
+
+  val matches = P.matches
+  val unwrap = P.unwrap
 end
 
-structure Tree = TreeFn (type 'a t = 'a val show = fn f => f)
+structure Tree =
+  TreeFn
+    (type 'a t = 'a
+     val show = fn f => f
+     val matches = fn _ => []
+     val unwrap = fn v => v)
 
 local
   val showList = fn a_ =>
@@ -49,6 +69,8 @@ in
           , "matches = " ^ "ref " ^ "["
             ^ String.concatWith ", " (List.map Int.toString t2) ^ "]"
           ] ^ "}"
+    fun matches ({matches, ...}: 'a t) = !matches
+    fun unwrap ({value, ...}: 'a t) = value
   end
 
   structure WithBitset =
@@ -65,6 +87,8 @@ in
           , "matches = " ^ "ref " ^ "["
             ^ String.concatWith ", " (List.map Int.toString t2) ^ "]"
           ] ^ "}"
+    fun matches ({matches, ...}: 'a t) = !matches
+    fun unwrap ({value, ...}: 'a t) = value
   end
 end
 
