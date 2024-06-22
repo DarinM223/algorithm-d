@@ -193,7 +193,6 @@ struct
               tabulate state'
             end
         end;
-      print (TreeWithCounter.show subject ^ "\n");
       subject
     end
 end
@@ -212,14 +211,10 @@ struct
           (fn () =>
              Vector.fromList (List.map Word8BitVector.create largestPathSizes))
           (Parser.parse subject)
-      val patternPaths =
-        List.foldli
-          (fn (i, tree, acc) =>
-             IntRedBlackMap.insert (acc, i, Tree.toPaths tree))
-          IntRedBlackMap.empty patterns
+      val patternPaths = List.map Tree.toPaths patterns
       val trie = Trie.create ()
       val () =
-        IntRedBlackMap.appi (fn (i, paths) => List.app (Trie.add trie i) paths)
+        List.appi (fn (i, paths) => List.app (Trie.add trie i) paths)
           patternPaths
       val () = Trie.compute trie
       val first = Trie.Node.follow (#root trie) (TreeWithBitset.label subject)
@@ -286,7 +281,6 @@ struct
               S.push (stack, {node = node', state = state', visited = ref ~1})
             end
         end;
-      print (TreeWithBitset.show subject ^ "\n");
       subject
     end
 end

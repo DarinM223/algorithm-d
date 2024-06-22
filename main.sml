@@ -22,34 +22,34 @@ struct
         ("a", [Tree.Node ("b", []), Tree.Node ("c", [Tree.Node ("d", [])])]))
       val paths = Tree.toPaths tree
 
-      val _ = print "Pattern tree:\n"
-      val _ = print (Tree.show tree ^ "\n\n")
+      val () = print "Pattern tree:\n"
+      val () = print (Tree.show tree ^ "\n\n")
 
-      val _ = print "Pattern paths:\n"
-      val _ = print (showPattern_paths paths ^ "\n\n")
+      val () = print "Pattern paths:\n"
+      val () = print (showPattern_paths paths ^ "\n\n")
 
-      val _ = print "Labelled counter tree instantiated from subject tree:\n"
-      val _ = print (TreeWithCounter.show tree2 ^ "\n\n")
+      val () = print "Labelled counter tree instantiated from subject tree:\n"
+      val () = print (TreeWithCounter.show tree2 ^ "\n\n")
 
-      val _ = print "First test:\n"
-      val _ = Algorithm.run ["f(x)"] "z(f(x, u), f(x), f(x))"
-      val _ = print "\n"
-      val _ = AlgorithmWithBitset.run ["f(x)"] "z(f(x, u), f(x), f(x))"
-      val _ = print "\n\n"
+      val () = print "First test:\n"
+      val result = Algorithm.run ["f(x)"] "z(f(x, u), f(x), f(x))"
+      val () = print (TreeWithCounter.show result ^ "\n\n")
+      val result = AlgorithmWithBitset.run ["f(x)"] "z(f(x, u), f(x), f(x))"
+      val () = print (TreeWithBitset.show result ^ "\n\n\n")
 
-      val _ = print "Second test:\n"
-      val _ = Algorithm.run ["a(a(b, _), c)"]
+      val () = print "Second test:\n"
+      val result = Algorithm.run ["a(a(b, _), c)"]
         "z(f(x, u), a(a(b, f(x)), c), a(a(b, f(x)), d))"
-      val _ = print "\n"
-      val _ = AlgorithmWithBitset.run ["a(a(b, _), c)"]
+      val () = print (TreeWithCounter.show result ^ "\n\n")
+      val result = AlgorithmWithBitset.run ["a(a(b, _), c)"]
         "z(f(x, u), a(a(b, f(x)), c), a(a(b, f(x)), d))"
-      val _ = print "\n\n"
+      val () = print (TreeWithBitset.show result ^ "\n\n\n")
 
       val _ = print "Third test:\n"
-      val _ = Algorithm.run ["g(_)"] "f(g(g(f(g(x)))))"
-      val _ = print "\n"
-      val _ = AlgorithmWithBitset.run ["g(_)"] "f(g(g(f(g(x)))))"
-      val _ = print "\n\n"
+      val result = Algorithm.run ["g(_)"] "f(g(g(f(g(x)))))"
+      val () = print (TreeWithCounter.show result ^ "\n\n")
+      val result = AlgorithmWithBitset.run ["g(_)"] "f(g(g(f(g(x)))))"
+      val () = print (TreeWithBitset.show result ^ "\n\n\n")
     in
       ()
     end
