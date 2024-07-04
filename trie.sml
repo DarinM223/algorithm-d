@@ -4,8 +4,28 @@ sig
   val hash: t -> word
 end
 
-functor TrieFn(NodeType: NodeType) =
+signature NODE =
+sig
+  type 'a t
+  val show: ('a -> string) -> 'a t -> string
+  val follow: 'a t -> 'a -> 'a t
+  val outputs: 'a t -> ('a list * int list) list
+end
+
+signature TRIE =
+sig
+  structure NodeType: NodeType
+  structure Node: NODE
+  type 'a t
+
+  val create: unit -> NodeType.t t
+  val add: NodeType.t t -> int -> NodeType.t list -> unit
+  val compute: 'a t -> unit
+end
+
+functor TrieFn(NodeType: NodeType): TRIE =
 struct
+  structure NodeType = NodeType
   structure Node =
   struct
     datatype 'a t =
