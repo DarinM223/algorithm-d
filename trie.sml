@@ -1,4 +1,4 @@
-signature NodeType =
+signature NODE_TYPE =
 sig
   eqtype t
   val hash: t -> word
@@ -14,7 +14,7 @@ end
 
 signature TRIE =
 sig
-  structure NodeType: NodeType
+  structure NodeType: NODE_TYPE
   structure Node: NODE
   type 'a t
 
@@ -23,7 +23,7 @@ sig
   val compute: 'a t -> unit
 end
 
-functor TrieFn(NodeType: NodeType): TRIE =
+functor TrieFn(NodeType: NODE_TYPE): TRIE =
 struct
   structure NodeType = NodeType
   structure Node =
