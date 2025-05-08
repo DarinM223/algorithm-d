@@ -2,19 +2,27 @@ structure Symbol =
 struct
   infix +`
   datatype t = Label of string | Child of int
-  val t =
-    let
-      open Sum Generic
-    in
-      data' (C1' "Label" string +` C1' "Child" int)
-        ( fn Child ? => INR ? | Label ? => INL ?
-        , fn INR ? => Child ? | INL ? => Label ?
-        )
-    end
+  val show =
+    fn Label t0 => "Label " ^ "(" ^ "\"" ^ t0 ^ "\"" ^ ")"
+     | Child t1 => "Child " ^ "(" ^ Int.toString t1 ^ ")"
+  local
+    val combine = fn (a, b) => 0w31 * a + b
+    val hashString =
+      #1
+      o
+      Substring.foldl
+        (fn (ch, (h, p)) =>
+           ( Word.mod (h + Word.fromInt (Char.ord ch + 1) * p, 0w1000000009)
+           , Word.mod (p * 0w31, 0w1000000009)
+           )) (0w0, 0w1) o Substring.full
+  in
+    val hash =
+      fn Label t0 => combine (hashString "Label", hashString t0)
+       | Child t1 => combine (hashString "Child", Word.fromInt t1)
+  end
 end
 
-structure Trie =
-  TrieFn (type t = Symbol.t val hash = Word32.toWord o Generic.hash Symbol.t)
+structure Trie = TrieFn (type t = Symbol.t val hash = Symbol.hash)
 
 structure Tree =
 struct

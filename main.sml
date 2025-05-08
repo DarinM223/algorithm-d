@@ -10,9 +10,8 @@ struct
         String.concatWith ", "
           (List.map
              (fn t0 =>
-                "["
-                ^ String.concatWith ", " (List.map (Generic.show Symbol.t) t0)
-                ^ "]") t0) ^ "]"
+                "[" ^ String.concatWith ", " (List.map Symbol.show t0) ^ "]") t0)
+        ^ "]"
 
       val tree = Tree.Node
         ( "a"
