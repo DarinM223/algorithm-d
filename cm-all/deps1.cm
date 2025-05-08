@@ -1,10 +1,10 @@
 group
     group(deps0.cm)
     library(../lib/github.com/DarinM223/extended-basis/basis.cm)
-    library(../lib/github.com/DarinM223/generic/lib-all.cm)
+    group(../lib/github.com/DarinM223/sml-bitvector/sml-bitvector.cm)
+    library(../lib/github.com/DarinM223/mlton-vector/mlton-vector.cm)
 is
     deps0.cm
     ../lib/github.com/DarinM223/extended-basis/basis.cm
-    ../lib/github.com/DarinM223/generic/lib-all.cm
     ../lib/github.com/DarinM223/sml-bitvector/sml-bitvector.cm
     ../lib/github.com/DarinM223/mlton-vector/mlton-vector.cm

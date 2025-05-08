@@ -261,10 +261,11 @@ struct
                  and bitwise and them together (logical product), then bitwise or
                  the result with the original bit string *)
               List.app
-                (fn child => foreach2 (bitset, #bitset child, uncurry andd))
+                (fn child =>
+                   foreach2 (bitset, #bitset child, TopLevel.uncurry andd))
                 children;
               Vector.app (shr 1) bitset;
-              foreach2 (#bitset node, bitset, uncurry or);
+              foreach2 (#bitset node, bitset, TopLevel.uncurry or);
               #matches node := Vector.foldli matchingRules [] (#bitset node)
             end
         | _ => ()
