@@ -1,5 +1,6 @@
 echo "@$SMLNETPATH/lib/smlnj-lib/Util/Util" > algorithmd.smlnet
 echo "@$SMLNETPATH/lib/mlyacc-lib/mlyacc-lib" >> algorithmd.smlnet
+echo "@./lib/github.com/DarinM223/mlton-vector/mlton-vector" >> algorithmd.smlnet
 cat >> algorithmd.smlnet <<EOL
 export Main
 make
@@ -10,6 +11,7 @@ mlton -stop f algorithmd.mlb \
     | grep -v ".mlb" \
     | grep -v "/lib/mlton/sml/" \
     | grep -v "/lib/mlton/targets/" \
+    | grep -v "mlton-vector" \
     | while read line ; do \
      if [[ $line == *.mlton.sml ]] ; then \
        if [ -f "${line/%.mlton.sml/.polyml.sml}" ]; then \

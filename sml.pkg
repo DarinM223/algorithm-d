@@ -1,5 +1,6 @@
 require {
   github.com/DarinM223/sml-bitvector 0.0.5 #f1ddeb93088a375c690477c48740a7e2d6d77bef
-  github.com/DarinM223/mlton-vector 0.0.2 #83656171d89150336a18ef4448da06f96458e235
+  github.com/DarinM223/mlton-vector 0.0.3 #369451cf5c2d1cc6ae2ed9f1c76eb917de8e8c06
   github.com/DarinM223/extended-basis 0.0.7 #48f2e01e7385928f8901fa29153647b4dc025ce7
+  github.com/DarinM223/dynamic-array 0.0.1 #b08a5de1aee157487d7420d76f826b642a3fbd1e
 }

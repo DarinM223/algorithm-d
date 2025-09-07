@@ -14,3 +14,4 @@ algorithmd.smlnet
 *.il
 .smlnetobj/
 .cm/
+*.lua

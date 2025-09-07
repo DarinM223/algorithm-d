@@ -141,10 +141,12 @@ struct
       val subject =
         Tree.instantiateCounter (List.length patterns) (Parser.parse subject)
       val patternPaths =
-        List.foldli
-          (fn (i, tree, acc) =>
+        List.foldl
+          (fn ((i, tree), acc) =>
              IntRedBlackMap.insert (acc, i, Tree.toPaths tree))
-          IntRedBlackMap.empty patterns
+          IntRedBlackMap.empty
+          (ListPair.zip
+             (List.tabulate (List.length patterns, fn i => i), patterns))
       val trie = Trie.create ()
       val () =
         IntRedBlackMap.appi (fn (i, paths) => List.app (Trie.add trie i) paths)
@@ -262,10 +264,10 @@ struct
                  the result with the original bit string *)
               List.app
                 (fn child =>
-                   foreach2 (bitset, #bitset child, TopLevel.uncurry andd))
+                   foreach2 (bitset, #bitset child, fn (a, b) => andd a b))
                 children;
               Vector.app (shr 1) bitset;
-              foreach2 (#bitset node, bitset, TopLevel.uncurry or);
+              foreach2 (#bitset node, bitset, fn (a, b) => or a b);
               #matches node := Vector.foldli matchingRules [] (#bitset node)
             end
         | _ => ()

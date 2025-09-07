@@ -53,8 +53,8 @@ structure Tree =
 local
   val showList = fn a_ =>
     fn t0 => "[" ^ String.concatWith ", " (List.map a_ t0) ^ "]"
-  fun showArray toString = showList toString o Array.toList
-  fun showVector toString = showList toString o Vector.toList
+  val showArray = fn toString => showList toString o Array.foldr op:: []
+  val showVector = fn toString => showList toString o Vector.foldr op:: []
 in
   structure WithCounter =
   struct

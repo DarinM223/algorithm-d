@@ -91,8 +91,9 @@ struct
       case HashTable.find (O #goto t) x of
         SOME target => target
       | NONE =>
-          if Option.isNone (O #parent t) then t
-          else follow (Option.valOf (!(O #failure t))) x
+          case O #parent t of
+            SOME _ => follow (Option.valOf (!(O #failure t))) x
+          | NONE => t
 
     fun outputs (t: 'a t) =
       let
